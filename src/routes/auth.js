@@ -34,6 +34,7 @@ router.post('/login', async (req, res) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      role: user.role || 'editor',
       must_change_password: user.must_change_password,
     };
 

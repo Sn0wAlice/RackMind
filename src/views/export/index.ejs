@@ -1,0 +1,42 @@
+<div class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i class="fa-solid fa-chevron-right separator"></i>
+  <span>Import / Export</span>
+</div>
+
+<div class="settings-grid">
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-file-export"></i> Export</h3>
+    </div>
+    <div class="card-body">
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">
+        Download your entire inventory as a file.
+      </p>
+      <div class="btn-group">
+        <a href="/export/items.csv" class="btn"><i class="fa-solid fa-file-csv"></i> Export CSV</a>
+        <a href="/export/items.json" class="btn"><i class="fa-solid fa-file-code"></i> Export JSON</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-file-import"></i> Import</h3>
+    </div>
+    <div class="card-body">
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
+        Upload a CSV file with columns: <code>Name</code>, <code>Type</code>, <code>Category</code>, <code>Location</code>, <code>Quantity</code>, <code>Status</code>, <code>Serial Number</code>, <code>Description</code>, <code>Notes</code>.
+      </p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+        Required: Name, Type. The Type must match an existing item type name.
+      </p>
+      <form method="POST" action="/export/import" enctype="multipart/form-data">
+        <div class="form-group">
+          <input type="file" name="csvfile" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-upload"></i> Import CSV</button>
+      </form>
+    </div>
+  </div>
+</div>

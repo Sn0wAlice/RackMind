@@ -1,35 +1,67 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <i class="fa-solid fa-server sidebar-logo-icon"></i>
+    <div class="sidebar-logo">
+      <i class="fa-solid fa-server"></i>
+    </div>
     <span class="sidebar-title">RackMind</span>
   </div>
 
   <nav class="sidebar-nav">
-    <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">
-      <i class="fa-solid fa-gauge"></i>
-      <span>Dashboard</span>
-    </a>
-    <a href="/items" class="nav-link <%= currentPath.startsWith('/items') ? 'active' : '' %>">
-      <i class="fa-solid fa-boxes-stacked"></i>
-      <span>Items</span>
-    </a>
-    <a href="/locations" class="nav-link <%= currentPath.startsWith('/locations') ? 'active' : '' %>">
-      <i class="fa-solid fa-location-dot"></i>
-      <span>Locations</span>
-    </a>
-    <a href="/categories" class="nav-link <%= currentPath.startsWith('/categories') ? 'active' : '' %>">
-      <i class="fa-solid fa-tags"></i>
-      <span>Categories</span>
-    </a>
-    <a href="/users" class="nav-link <%= currentPath.startsWith('/users') ? 'active' : '' %>">
-      <i class="fa-solid fa-users"></i>
-      <span>Users</span>
-    </a>
+    <div class="nav-section">
+      <div class="nav-section-label">Navigation</div>
+      <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">
+        <i class="fa-solid fa-gauge"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="/items" class="nav-link <%= currentPath.startsWith('/items') ? 'active' : '' %>">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span>Items</span>
+      </a>
+      <a href="/locations" class="nav-link <%= currentPath.startsWith('/locations') ? 'active' : '' %>">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>Locations</span>
+      </a>
+      <a href="/categories" class="nav-link <%= currentPath.startsWith('/categories') ? 'active' : '' %>">
+        <i class="fa-solid fa-tags"></i>
+        <span>Categories</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Outils</div>
+      <a href="/activity" class="nav-link <%= currentPath.startsWith('/activity') ? 'active' : '' %>">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Activity</span>
+      </a>
+      <a href="/to-order" class="nav-link <%= currentPath.startsWith('/to-order') ? 'active' : '' %>">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span>To Order</span>
+        <% if (typeof toOrderCount !== 'undefined' && toOrderCount > 0) { %>
+          <span class="nav-badge"><%= toOrderCount %></span>
+        <% } %>
+      </a>
+      <a href="/export" class="nav-link <%= currentPath.startsWith('/export') ? 'active' : '' %>">
+        <i class="fa-solid fa-file-export"></i>
+        <span>Export</span>
+      </a>
+    </div>
+
+    <% if (user && user.role === 'admin') { %>
+    <div class="nav-section">
+      <div class="nav-section-label">Admin</div>
+      <a href="/users" class="nav-link <%= currentPath.startsWith('/users') ? 'active' : '' %>">
+        <i class="fa-solid fa-users"></i>
+        <span>Users</span>
+      </a>
+    </div>
+    <% } %>
   </nav>
 
   <div class="sidebar-footer">
     <a href="/settings" class="sidebar-user-link <%= currentPath.startsWith('/settings') ? 'active' : '' %>">
-      <i class="fa-solid fa-circle-user"></i>
+      <div class="sidebar-avatar">
+        <%= user ? user.username.charAt(0).toUpperCase() : 'U' %>
+      </div>
       <span><%= user ? user.username : '' %></span>
       <i class="fa-solid fa-gear sidebar-settings-icon"></i>
     </a>

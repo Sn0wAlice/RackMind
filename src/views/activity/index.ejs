@@ -1,0 +1,105 @@
+<div class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i class="fa-solid fa-chevron-right separator"></i>
+  <span>Activity</span>
+</div>
+
+<div class="section-header">
+  <h3><%= total %> log entr<%= total !== 1 ? 'ies' : 'y' %></h3>
+</div>
+
+<form method="GET" action="/activity" class="filter-bar fade-up">
+  <select name="entity_type" onchange="this.form.submit()">
+    <option value="">All Types</option>
+    <option value="item" <%= filters.entity_type === 'item' ? 'selected' : '' %>>Items</option>
+    <option value="location" <%= filters.entity_type === 'location' ? 'selected' : '' %>>Locations</option>
+    <option value="category" <%= filters.entity_type === 'category' ? 'selected' : '' %>>Categories</option>
+    <option value="item_type" <%= filters.entity_type === 'item_type' ? 'selected' : '' %>>Types</option>
+    <option value="user" <%= filters.entity_type === 'user' ? 'selected' : '' %>>Users</option>
+  </select>
+  <select name="user_id" onchange="this.form.submit()">
+    <option value="">All Users</option>
+    <% users.forEach(function(u) { %>
+      <option value="<%= u.id %>" <%= filters.user_id == u.id ? 'selected' : '' %>><%= u.username %></option>
+    <% }); %>
+  </select>
+</form>
+
+<% if (logs.length === 0) { %>
+  <div class="card">
+    <div class="empty-state fade-up">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <h3>No activity yet</h3>
+      <p>Activity will appear here as changes are made.</p>
+    </div>
+  </div>
+<% } else { %>
+  <div class="table-wrapper fade-up">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>User</th>
+          <th>Action</th>
+          <th>Entity</th>
+          <th>Name</th>
+          <th>Changes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% logs.forEach(function(log) { %>
+          <%
+            var details = null;
+            if (log.details) {
+              try { details = typeof log.details === 'string' ? JSON.parse(log.details) : log.details; } catch(e) {}
+            }
+          %>
+          <tr>
+            <td style="white-space:nowrap;font-size:12px;color:var(--text-muted);"><%= new Date(log.created_at).toLocaleString() %></td>
+            <td><%= log.username || 'System' %></td>
+            <td>
+              <span class="status-badge status-<%= log.action === 'create' ? 'in_stock' : log.action === 'delete' ? 'broken' : log.action === 'import' ? 'in_use' : 'to_order' %>">
+                <%= log.action %>
+              </span>
+            </td>
+            <td><%= log.entity_type %></td>
+            <td>
+              <% if (log.entity_type === 'item' && log.action !== 'delete') { %>
+                <a href="/items/<%= log.entity_id %>"><%= log.entity_name || '#' + log.entity_id %></a>
+              <% } else if (log.entity_type === 'location' && log.action !== 'delete') { %>
+                <a href="/locations/<%= log.entity_id %>"><%= log.entity_name || '#' + log.entity_id %></a>
+              <% } else { %>
+                <%= log.entity_name || '#' + log.entity_id %>
+              <% } %>
+            </td>
+            <td style="font-size:12px;">
+              <% if (details && typeof details === 'object') { %>
+                <% Object.keys(details).forEach(function(key) { %>
+                  <% var val = details[key]; %>
+                  <% if (val && val.from !== undefined && val.to !== undefined) { %>
+                    <div style="margin-bottom:2px;">
+                      <span style="color:var(--text-muted);"><%= key %>:</span>
+                      <span style="color:var(--error);text-decoration:line-through;"><%= val.from || '—' %></span>
+                      <i class="fa-solid fa-arrow-right" style="font-size:9px;margin:0 3px;color:var(--text-muted);"></i>
+                      <span style="color:var(--success);"><%= val.to || '—' %></span>
+                    </div>
+                  <% } else if (key === 'bulk') { %>
+                    <span class="badge">bulk</span>
+                  <% } else if (key === 'duplicatedFrom') { %>
+                    <span style="color:var(--text-muted);">from #<%= val %></span>
+                  <% } else if (key === 'moved') { %>
+                    <span style="color:var(--info);">moved</span>
+                  <% } %>
+                <% }); %>
+              <% } else { %>
+                —
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <%- include('../partials/pagination', { totalPages, currentPage, query }) %>
+<% } %>

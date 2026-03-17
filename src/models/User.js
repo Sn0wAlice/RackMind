@@ -12,16 +12,20 @@ module.exports = {
   },
 
   async getAll() {
-    const [rows] = await pool.query('SELECT id, username, email, must_change_password, created_at FROM users ORDER BY created_at DESC');
+    const [rows] = await pool.query('SELECT id, username, email, role, must_change_password, created_at FROM users ORDER BY created_at DESC');
     return rows;
   },
 
-  async create({ username, email, passwordHash, mustChangePassword = false }) {
+  async create({ username, email, passwordHash, mustChangePassword = false, role = 'editor' }) {
     const [result] = await pool.query(
-      'INSERT INTO users (username, email, password_hash, must_change_password) VALUES (?, ?, ?, ?)',
-      [username, email || null, passwordHash, mustChangePassword ? 1 : 0]
+      'INSERT INTO users (username, email, password_hash, must_change_password, role) VALUES (?, ?, ?, ?, ?)',
+      [username, email || null, passwordHash, mustChangePassword ? 1 : 0, role]
     );
     return result.insertId;
+  },
+
+  async updateRole(id, role) {
+    await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, id]);
   },
 
   async updatePassword(id, passwordHash) {

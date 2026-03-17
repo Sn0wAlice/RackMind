@@ -1,6 +1,8 @@
 const express = require('express');
 const Location = require('../models/Location');
 const Item = require('../models/Item');
+const ActivityLog = require('../models/ActivityLog');
+const { requireEditor } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -23,7 +25,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create form
-router.get('/create', async (req, res) => {
+router.get('/create', requireEditor, async (req, res) => {
   try {
     const locations = await Location.getAll();
     res.render('locations/form', {
@@ -42,7 +44,7 @@ router.get('/create', async (req, res) => {
 });
 
 // Create
-router.post('/create', async (req, res) => {
+router.post('/create', requireEditor, async (req, res) => {
   try {
     const { parent_id, name, description, icon } = req.body;
 
@@ -56,6 +58,14 @@ router.post('/create', async (req, res) => {
       name,
       description,
       icon: icon || 'fa-solid fa-location-dot',
+    });
+
+    await ActivityLog.log({
+      userId: req.session.user.id,
+      action: 'create',
+      entityType: 'location',
+      entityId: id,
+      entityName: name,
     });
 
     req.flash('success', 'Location created.');
@@ -97,7 +107,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Edit form
-router.get('/:id/edit', async (req, res) => {
+router.get('/:id/edit', requireEditor, async (req, res) => {
   try {
     const location = await Location.findById(req.params.id);
     if (!location) {
@@ -123,7 +133,7 @@ router.get('/:id/edit', async (req, res) => {
 });
 
 // Update
-router.post('/:id/edit', async (req, res) => {
+router.post('/:id/edit', requireEditor, async (req, res) => {
   try {
     const { parent_id, name, description, icon } = req.body;
 
@@ -139,6 +149,14 @@ router.post('/:id/edit', async (req, res) => {
       icon: icon || 'fa-solid fa-location-dot',
     });
 
+    await ActivityLog.log({
+      userId: req.session.user.id,
+      action: 'update',
+      entityType: 'location',
+      entityId: parseInt(req.params.id),
+      entityName: name,
+    });
+
     req.flash('success', 'Location updated.');
     res.redirect('/locations/' + req.params.id);
   } catch (err) {
@@ -149,9 +167,21 @@ router.post('/:id/edit', async (req, res) => {
 });
 
 // Delete
-router.post('/:id/delete', async (req, res) => {
+router.post('/:id/delete', requireEditor, async (req, res) => {
   try {
+    const location = await Location.findById(req.params.id);
     await Location.delete(req.params.id);
+
+    if (location) {
+      await ActivityLog.log({
+        userId: req.session.user.id,
+        action: 'delete',
+        entityType: 'location',
+        entityId: parseInt(req.params.id),
+        entityName: location.name,
+      });
+    }
+
     req.flash('success', 'Location deleted.');
     res.redirect('/locations');
   } catch (err) {

@@ -41,6 +41,21 @@
       <%- body %>
     </div>
   </div>
+  <script>
+    (function() {
+      var token = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
+      if (!token) return;
+      document.querySelectorAll('form[method="POST"], form[method="post"]').forEach(function(form) {
+        if (!form.querySelector('input[name="_csrf"]')) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = '_csrf';
+          input.value = token;
+          form.appendChild(input);
+        }
+      });
+    })();
+  </script>
   <script src="/js/app.js"></script>
 </body>
 </html>

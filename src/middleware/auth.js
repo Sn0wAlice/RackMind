@@ -19,4 +19,28 @@ function requirePasswordChange(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requirePasswordChange };
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.session.user) {
+      req.flash('error', 'Please log in to continue.');
+      return res.redirect('/auth/login');
+    }
+    const userRole = req.session.user.role || 'editor';
+    if (!roles.includes(userRole)) {
+      req.flash('error', 'You do not have permission to access this page.');
+      return res.redirect('/');
+    }
+    next();
+  };
+}
+
+function requireEditor(req, res, next) {
+  const role = req.session.user?.role || 'editor';
+  if (role === 'viewer') {
+    req.flash('error', 'Viewers cannot perform this action.');
+    return res.redirect('back');
+  }
+  next();
+}
+
+module.exports = { requireAuth, requirePasswordChange, requireRole, requireEditor };

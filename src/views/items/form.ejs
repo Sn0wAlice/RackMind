@@ -58,6 +58,23 @@
         </select>
       </div>
 
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="in_stock" <%= (editing && item.status === 'in_stock') ? 'selected' : '' %>>In Stock</option>
+          <option value="in_use" <%= (editing && item.status === 'in_use') ? 'selected' : '' %>>In Use</option>
+          <option value="to_order" <%= (editing && item.status === 'to_order') ? 'selected' : '' %>>To Order</option>
+          <option value="broken" <%= (editing && item.status === 'broken') ? 'selected' : '' %>>Broken</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="tags">Tags</label>
+        <input type="text" id="tags" name="tags" placeholder="Comma-separated tags (e.g. network, critical, rack-1)"
+          value="<%= editing && typeof itemTags !== 'undefined' && itemTags ? itemTags.map(function(t) { return t.name; }).join(', ') : '' %>">
+        <span class="form-hint">Separate multiple tags with commas.</span>
+      </div>
+
       <div class="form-check">
         <input type="checkbox" id="isUnique" name="is_unique" value="1"
           <%= (!editing || item.is_unique) ? 'checked' : '' %>>
@@ -73,6 +90,12 @@
       <div id="quantityField" class="form-group" style="display:none;">
         <label for="quantity">Quantity</label>
         <input type="number" id="quantity" name="quantity" min="1" value="<%= editing ? item.quantity : 1 %>">
+      </div>
+
+      <div id="thresholdField" class="form-group" style="display:none;">
+        <label for="low_stock_threshold">Low Stock Threshold</label>
+        <input type="number" id="low_stock_threshold" name="low_stock_threshold" min="0" placeholder="Alert when quantity drops below this"
+          value="<%= editing && item.low_stock_threshold ? item.low_stock_threshold : '' %>">
       </div>
 
       <!-- Specs -->
@@ -110,6 +133,27 @@
       <div class="form-group">
         <label for="notes">Notes</label>
         <textarea id="notes" name="notes" placeholder="Additional notes"><%= editing && item.notes ? item.notes : '' %></textarea>
+      </div>
+
+      <!-- Item Links -->
+      <div class="form-group">
+        <label>Link to Other Items</label>
+        <div class="search-input-wrapper" style="margin-bottom:8px;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="itemLinkSearch" placeholder="Search items to link..." style="width:100%;padding-left:36px;">
+        </div>
+        <div id="itemLinkResults" class="search-dropdown" style="display:none;"></div>
+        <div id="linkedItems" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+          <% if (editing && item.linked_items) { %>
+            <% item.linked_items.forEach(function(linked) { %>
+              <span class="tag" style="background:var(--badge-bg);color:var(--badge-text);">
+                <%= linked.name %>
+                <input type="hidden" name="linked_item_ids[]" value="<%= linked.id %>">
+                <button type="button" class="btn-remove-spec" style="border:none;background:none;padding:0 0 0 4px;font-size:11px;cursor:pointer;color:inherit;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+              </span>
+            <% }); %>
+          <% } %>
+        </div>
       </div>
 
       <div class="btn-group">

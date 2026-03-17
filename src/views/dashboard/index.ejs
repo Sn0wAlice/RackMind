@@ -21,43 +21,179 @@
   </div>
 </div>
 
-<div class="section-header">
-  <h3>Recent Items</h3>
-  <a href="/items" class="btn btn-sm"><i class="fa-solid fa-arrow-right"></i> View All</a>
-</div>
-
-<% if (recentItems.length === 0) { %>
-  <div class="card">
-    <div class="empty-state fade-up">
-      <i class="fa-solid fa-box-open"></i>
-      <h3>No items yet</h3>
-      <p>Start by adding your first inventory item.</p>
-      <a href="/items/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Item</a>
+<!-- Charts Row -->
+<div class="charts-grid">
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-chart-pie"></i> Par catégorie</h3>
+    </div>
+    <div class="card-body" style="padding:10px;">
+      <canvas id="categoryChart" height="180"></canvas>
     </div>
   </div>
-<% } else { %>
-  <div class="items-grid">
-    <% recentItems.forEach(function(item) { %>
-      <a href="/items/<%= item.id %>" class="item-card card card-hover fade-up" style="text-decoration:none;">
-        <div class="item-card-header">
-          <div class="item-card-icon">
-            <i class="<%= item.type_icon %>"></i>
-          </div>
-          <div class="item-card-info">
-            <h4><%= item.name %></h4>
-            <p><%= item.type_name %></p>
-          </div>
-        </div>
-        <div class="item-card-meta">
-          <span class="badge"><i class="<%= item.type_icon %>"></i> <%= item.category_name %></span>
-          <% if (item.location_name) { %>
-            <span class="badge"><i class="fa-solid fa-location-dot"></i> <%= item.location_name %></span>
-          <% } %>
-          <% if (!item.is_unique && item.quantity > 1) { %>
-            <span class="badge"><i class="fa-solid fa-layer-group"></i> x<%= item.quantity %></span>
-          <% } %>
-        </div>
-      </a>
-    <% }); %>
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-chart-pie"></i> Par statut</h3>
+    </div>
+    <div class="card-body" style="padding:10px;">
+      <canvas id="statusChart" height="180"></canvas>
+    </div>
   </div>
-<% } %>
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-chart-pie"></i> Par emplacement</h3>
+    </div>
+    <div class="card-body" style="padding:10px;">
+      <canvas id="locationChart" height="180"></canvas>
+    </div>
+  </div>
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-chart-pie"></i> Par type</h3>
+    </div>
+    <div class="card-body" style="padding:10px;">
+      <canvas id="typeChart" height="180"></canvas>
+    </div>
+  </div>
+</div>
+
+<style>
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 0;
+}
+.charts-grid .card-header h3 { font-size: 13px; }
+@media (max-width: 1024px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .charts-grid { grid-template-columns: 1fr; } }
+</style>
+
+<!-- Alerts & Activity Row -->
+<div class="charts-row" style="margin-top:24px;">
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> Low Stock Alerts</h3>
+      <a href="/to-order" class="btn btn-sm">View All</a>
+    </div>
+    <div class="card-body">
+      <% if (typeof lowStockItems !== 'undefined' && lowStockItems.length > 0) { %>
+        <div class="alert-list">
+          <% lowStockItems.forEach(function(item) { %>
+            <a href="/items/<%= item.id %>" class="alert-list-item">
+              <span><i class="<%= item.type_icon %>"></i> <%= item.name %></span>
+              <span class="badge" style="color:var(--error);"><%= item.quantity %> / <%= item.low_stock_threshold %></span>
+            </a>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p style="font-size:13px;color:var(--text-muted);text-align:center;padding:20px 0;">No low stock alerts.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
+      <a href="/activity" class="btn btn-sm">View All</a>
+    </div>
+    <div class="card-body">
+      <% if (typeof recentActivity !== 'undefined' && recentActivity.length > 0) { %>
+        <div class="alert-list">
+          <% recentActivity.forEach(function(log) { %>
+            <div class="alert-list-item">
+              <span>
+                <span class="status-badge status-<%= log.action === 'create' ? 'in_stock' : log.action === 'delete' ? 'broken' : 'to_order' %>" style="font-size:10px;"><%= log.action %></span>
+                <%= log.entity_name || log.entity_type + ' #' + log.entity_id %>
+              </span>
+              <span style="font-size:11px;color:var(--text-muted);"><%= log.username || 'System' %></span>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p style="font-size:13px;color:var(--text-muted);text-align:center;padding:20px 0;">No recent activity.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;">
+  <div class="section-header">
+    <h3>Recent Items</h3>
+    <a href="/items" class="btn btn-sm"><i class="fa-solid fa-arrow-right"></i> View All</a>
+  </div>
+
+  <% if (recentItems.length === 0) { %>
+    <div class="card">
+      <div class="empty-state fade-up">
+        <i class="fa-solid fa-box-open"></i>
+        <h3>No items yet</h3>
+        <p>Start by adding your first inventory item.</p>
+        <a href="/items/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Item</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="items-grid">
+      <% recentItems.forEach(function(item) { %>
+        <a href="/items/<%= item.id %>" class="item-card card card-hover fade-up" style="text-decoration:none;">
+          <div class="item-card-header">
+            <div class="item-card-icon">
+              <i class="<%= item.type_icon %>"></i>
+            </div>
+            <div class="item-card-info">
+              <h4><%= item.name %></h4>
+              <p><%= item.type_name %></p>
+            </div>
+          </div>
+          <div class="item-card-meta">
+            <span class="badge"><i class="<%= item.type_icon %>"></i> <%= item.category_name %></span>
+            <% if (item.location_name) { %>
+              <span class="badge"><i class="fa-solid fa-location-dot"></i> <%= item.location_name %></span>
+            <% } %>
+            <% if (!item.is_unique && item.quantity > 1) { %>
+              <span class="badge"><i class="fa-solid fa-layer-group"></i> x<%= item.quantity %></span>
+            <% } %>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const chartColors = ['#111111','#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#64748b','#84cc16'];
+    const legendOpts = { position: 'bottom', labels: { boxWidth: 8, padding: 8, font: { size: 10 } } };
+
+    function makeChart(id, type, labels, data, colors) {
+      const ctx = document.getElementById(id);
+      if (!ctx || typeof Chart === 'undefined' || !data.length) return;
+      new Chart(ctx, {
+        type,
+        data: { labels, datasets: [{ data, backgroundColor: colors }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: legendOpts } }
+      });
+    }
+
+    // Category
+    const catData = <%- JSON.stringify(typeof categoryDistribution !== 'undefined' ? categoryDistribution : []) %>;
+    makeChart('categoryChart', 'pie', catData.map(d => d.name), catData.map(d => d.count), chartColors);
+
+    // Status
+    const statusData = <%- JSON.stringify(typeof statusDistribution !== 'undefined' ? statusDistribution : []) %>;
+    const statusColors = { in_stock: '#059669', in_use: '#2563eb', to_order: '#f59e0b', broken: '#dc2626' };
+    makeChart('statusChart', 'doughnut',
+      statusData.map(d => d.status.replace(/_/g, ' ')),
+      statusData.map(d => d.count),
+      statusData.map(d => statusColors[d.status] || '#64748b')
+    );
+
+    // Location
+    const locData = <%- JSON.stringify(typeof locationDistribution !== 'undefined' ? locationDistribution : []) %>;
+    makeChart('locationChart', 'doughnut', locData.map(d => d.name), locData.map(d => d.count), chartColors);
+
+    // Type
+    const typeData = <%- JSON.stringify(typeof typeDistribution !== 'undefined' ? typeDistribution : []) %>;
+    makeChart('typeChart', 'pie', typeData.map(d => d.name), typeData.map(d => d.count), chartColors.slice().reverse());
+  });
+</script>

@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥</text></svg>">
 </head>
 <body>
   <!-- Mobile header -->
@@ -31,7 +33,12 @@
           <h2 class="page-title"><%= typeof title !== 'undefined' ? title : 'Dashboard' %></h2>
         </div>
         <div class="top-bar-right">
-          <form action="/items" method="GET" class="search-form">
+          <button class="btn btn-sm cmd-palette-trigger" id="cmdPaletteTrigger" title="Command Palette (Ctrl+K)">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Search...</span>
+            <kbd>Ctrl+K</kbd>
+          </button>
+          <form action="/items" method="GET" class="search-form" style="display:none;">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" name="search" placeholder="Search items..." value="<%= typeof search !== 'undefined' ? search : '' %>">
@@ -43,8 +50,6 @@
         </div>
       </div>
 
-      <%- include('../partials/flash') %>
-
       <div class="content">
         <%- body %>
       </div>
@@ -54,6 +59,71 @@
   <!-- Overlay for mobile sidebar -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+  <!-- Command Palette -->
+  <div class="cmd-palette-overlay" id="cmdPalette">
+    <div class="cmd-palette">
+      <div class="cmd-palette-input-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="cmdPaletteInput" placeholder="Search items, locations, categories..." autocomplete="off">
+        <kbd>ESC</kbd>
+      </div>
+      <div class="cmd-palette-results" id="cmdPaletteResults">
+        <div class="cmd-palette-section">
+          <div class="cmd-palette-label">Quick actions</div>
+          <a href="/items/create" class="cmd-palette-item"><i class="fa-solid fa-plus"></i> New Item</a>
+          <a href="/items" class="cmd-palette-item"><i class="fa-solid fa-boxes-stacked"></i> All Items</a>
+          <a href="/locations" class="cmd-palette-item"><i class="fa-solid fa-location-dot"></i> Locations</a>
+          <a href="/categories" class="cmd-palette-item"><i class="fa-solid fa-tags"></i> Categories</a>
+          <a href="/export" class="cmd-palette-item"><i class="fa-solid fa-file-export"></i> Export</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer">
+    <% if (typeof flash !== 'undefined' && flash.success && flash.success.length) { %>
+      <div class="toast toast-success" data-auto-dismiss="4000">
+        <i class="fa-solid fa-circle-check"></i>
+        <span><%= flash.success[0] %></span>
+        <button class="toast-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    <% } %>
+    <% if (typeof flash !== 'undefined' && flash.error && flash.error.length) { %>
+      <div class="toast toast-error" data-auto-dismiss="6000">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span><%= flash.error[0] %></span>
+        <button class="toast-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    <% } %>
+    <% if (typeof flash !== 'undefined' && flash.info && flash.info.length) { %>
+      <div class="toast toast-info" data-auto-dismiss="4000">
+        <i class="fa-solid fa-circle-info"></i>
+        <span><%= flash.info[0] %></span>
+        <button class="toast-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    <% } %>
+  </div>
+
+  <%- include('../partials/confirm-modal') %>
+  <script>
+    // Auto-inject CSRF token into all forms
+    (function() {
+      var token = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
+      if (!token) return;
+      document.querySelectorAll('form[method="POST"], form[method="post"]').forEach(function(form) {
+        if (!form.querySelector('input[name="_csrf"]')) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = '_csrf';
+          input.value = token;
+          form.appendChild(input);
+        }
+      });
+      // Set header for AJAX requests
+      window._csrfToken = token;
+    })();
+  </script>
   <script src="/js/app.js"></script>
 </body>
 </html>

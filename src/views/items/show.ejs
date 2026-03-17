@@ -7,8 +7,11 @@
 <div class="section-header">
   <div></div>
   <div class="btn-group">
+    <form method="POST" action="/items/<%= item.id %>/duplicate" style="display:inline;">
+      <button type="submit" class="btn btn-sm"><i class="fa-solid fa-copy"></i> Duplicate</button>
+    </form>
     <a href="/items/<%= item.id %>/edit" class="btn"><i class="fa-solid fa-pencil"></i> Edit</a>
-    <form method="POST" action="/items/<%= item.id %>/delete" class="delete-form">
+    <form method="POST" action="/items/<%= item.id %>/delete" class="delete-form" data-confirm-title="Delete Item" data-confirm-message="Delete &quot;<%= item.name %>&quot;? This cannot be undone.">
       <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button>
     </form>
   </div>
@@ -22,11 +25,28 @@
           <img src="<%= item.image_url %>" alt="<%= item.name %>" class="item-image">
         <% } %>
 
+        <% if (images && images.length > 0) { %>
+          <div class="image-gallery" style="margin-bottom:16px;">
+            <% if (item.image_url) { %>
+              <img src="<%= item.image_url %>" alt="Main">
+            <% } %>
+            <% images.forEach(function(img) { %>
+              <img src="<%= img.url %>" alt="Image">
+            <% }); %>
+          </div>
+        <% } %>
+
         <div class="detail-section">
           <h3>General</h3>
           <div class="detail-row">
             <span class="detail-label">Name</span>
             <span class="detail-value"><%= item.name %></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">
+              <span class="status-badge status-<%= item.status || 'in_stock' %>"><%= (item.status || 'in_stock').replace(/_/g, ' ') %></span>
+            </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Category</span>
@@ -45,10 +65,33 @@
           <% if (!item.is_unique) { %>
             <div class="detail-row">
               <span class="detail-label">Quantity</span>
-              <span class="detail-value"><%= item.quantity %></span>
+              <span class="detail-value">
+                <div class="qty-controls">
+                  <button class="qty-btn" data-item-id="<%= item.id %>" data-delta="-1">−</button>
+                  <span class="qty-value"><%= item.quantity %></span>
+                  <button class="qty-btn" data-item-id="<%= item.id %>" data-delta="1">+</button>
+                </div>
+              </span>
             </div>
+            <% if (item.low_stock_threshold) { %>
+              <div class="detail-row">
+                <span class="detail-label">Low Stock Alert</span>
+                <span class="detail-value"><%= item.low_stock_threshold %></span>
+              </div>
+            <% } %>
           <% } %>
         </div>
+
+        <% if (tags && tags.length > 0) { %>
+          <div class="detail-section">
+            <h3>Tags</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <% tags.forEach(function(tag) { %>
+                <span class="tag" style="background:<%= tag.color %>20;color:<%= tag.color %>;border:1px solid <%= tag.color %>40;"><%= tag.name %></span>
+              <% }); %>
+            </div>
+          </div>
+        <% } %>
 
         <% if (item.description) { %>
           <div class="detail-section">
@@ -63,6 +106,39 @@
             <p style="font-size:14px;color:var(--text-secondary);"><%= item.notes %></p>
           </div>
         <% } %>
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div class="card fade-up" style="margin-top:16px;">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-comments"></i> Comments (<%= comments ? comments.length : 0 %>)</h3>
+      </div>
+      <div class="card-body">
+        <div id="commentsList">
+          <% if (comments && comments.length > 0) { %>
+            <% comments.forEach(function(c) { %>
+              <div class="comment">
+                <div class="comment-header">
+                  <span class="comment-author"><%= c.username %></span>
+                  <span class="comment-time"><%= new Date(c.created_at).toLocaleString() %></span>
+                  <% if (user && c.user_id === user.id) { %>
+                    <button class="btn btn-sm" onclick="deleteComment(<%= c.id %>)" style="margin-left:auto;padding:2px 6px;font-size:11px;"><i class="fa-solid fa-trash"></i></button>
+                  <% } %>
+                </div>
+                <div class="comment-body"><%= c.body %></div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p style="font-size:13px;color:var(--text-muted);">No comments yet.</p>
+          <% } %>
+        </div>
+        <form id="commentForm" style="margin-top:12px;">
+          <div class="form-group" style="margin-bottom:8px;">
+            <textarea id="commentBody" placeholder="Add a comment..." rows="2" style="min-height:60px;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-paper-plane"></i> Comment</button>
+        </form>
       </div>
     </div>
   </div>
@@ -87,7 +163,7 @@
     <% } %>
 
     <% if (item.specs && typeof item.specs === 'object' && Object.keys(item.specs).length > 0) { %>
-      <div class="card fade-up">
+      <div class="card fade-up" style="margin-bottom:16px;">
         <div class="card-body">
           <div class="detail-section">
             <h3>Specifications</h3>
@@ -102,7 +178,49 @@
       </div>
     <% } %>
 
-    <div class="card fade-up" style="margin-top:16px;">
+    <!-- Related Items -->
+    <% if ((parents && parents.length > 0) || (children && children.length > 0)) { %>
+      <div class="card fade-up" style="margin-bottom:16px;">
+        <div class="card-body">
+          <div class="detail-section">
+            <h3>Related Items</h3>
+            <% if (parents && parents.length > 0) { %>
+              <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">CONTAINED IN</p>
+              <% parents.forEach(function(p) { %>
+                <a href="/items/<%= p.item_id %>" class="alert-list-item" style="text-decoration:none;color:inherit;">
+                  <span><i class="<%= p.type_icon %>"></i> <%= p.item_name %></span>
+                  <span class="badge"><%= p.relationship %></span>
+                </a>
+              <% }); %>
+            <% } %>
+            <% if (children && children.length > 0) { %>
+              <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin:<% if (parents && parents.length > 0) { %>12px<% } else { %>0<% } %> 0 6px;">CONTAINS</p>
+              <% children.forEach(function(c) { %>
+                <a href="/items/<%= c.item_id %>" class="alert-list-item" style="text-decoration:none;color:inherit;">
+                  <span><i class="<%= c.type_icon %>"></i> <%= c.item_name %></span>
+                  <span class="badge"><%= c.relationship %></span>
+                </a>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- QR Code -->
+    <div class="card fade-up" style="margin-bottom:16px;">
+      <div class="card-body">
+        <div class="detail-section">
+          <h3>QR Code</h3>
+          <div class="qr-container">
+            <img src="/api/items/<%= item.id %>/qrcode" alt="QR Code" style="max-width:160px;">
+            <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Scan to access this item</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card fade-up">
       <div class="card-body">
         <div class="detail-section">
           <h3>Metadata</h3>
@@ -119,3 +237,28 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Comments
+  const commentForm = document.getElementById('commentForm');
+  if (commentForm) {
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = document.getElementById('commentBody').value.trim();
+      if (!body) return;
+      try {
+        const res = await fetch('/api/items/<%= item.id %>/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ body }),
+        });
+        if (res.ok) location.reload();
+      } catch (err) { console.error(err); }
+    });
+  }
+
+  function deleteComment(id) {
+    if (!confirm('Delete this comment?')) return;
+    fetch('/api/comments/' + id, { method: 'DELETE' }).then(() => location.reload());
+  }
+</script>

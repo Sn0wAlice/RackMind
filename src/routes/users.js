@@ -1,8 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { requireRole } = require('../middleware/auth');
 
 const router = express.Router();
+
+// All user management requires admin role
+router.use(requireRole('admin'));
 
 // List users
 router.get('/', async (req, res) => {
@@ -29,7 +33,7 @@ router.get('/create', (req, res) => {
 // Create user
 router.post('/create', async (req, res) => {
   try {
-    const { username, email, password, must_change_password } = req.body;
+    const { username, email, password, must_change_password, role } = req.body;
 
     if (!username || !password) {
       req.flash('error', 'Username and password are required.');
@@ -53,6 +57,7 @@ router.post('/create', async (req, res) => {
       email,
       passwordHash: hash,
       mustChangePassword: !!must_change_password,
+      role: role || 'editor',
     });
 
     req.flash('success', 'User created.');

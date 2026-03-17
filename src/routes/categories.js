@@ -1,6 +1,8 @@
 const express = require('express');
 const Category = require('../models/Category');
 const ItemType = require('../models/ItemType');
+const ActivityLog = require('../models/ActivityLog');
+const { requireEditor } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -29,7 +31,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create category form
-router.get('/create', (req, res) => {
+router.get('/create', requireEditor, (req, res) => {
   res.render('categories/form', {
     title: 'Add Category',
     category: null,
@@ -39,7 +41,7 @@ router.get('/create', (req, res) => {
 });
 
 // Create category
-router.post('/create', async (req, res) => {
+router.post('/create', requireEditor, async (req, res) => {
   try {
     const { name, icon, description } = req.body;
     if (!name) {
@@ -47,7 +49,16 @@ router.post('/create', async (req, res) => {
       return res.redirect('/categories/create');
     }
 
-    await Category.create({ name, icon, description });
+    const id = await Category.create({ name, icon, description });
+
+    await ActivityLog.log({
+      userId: req.session.user.id,
+      action: 'create',
+      entityType: 'category',
+      entityId: id,
+      entityName: name,
+    });
+
     req.flash('success', 'Category created.');
     res.redirect('/categories');
   } catch (err) {
@@ -58,7 +69,7 @@ router.post('/create', async (req, res) => {
 });
 
 // Edit category form
-router.get('/:id/edit', async (req, res) => {
+router.get('/:id/edit', requireEditor, async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
@@ -80,7 +91,7 @@ router.get('/:id/edit', async (req, res) => {
 });
 
 // Update category
-router.post('/:id/edit', async (req, res) => {
+router.post('/:id/edit', requireEditor, async (req, res) => {
   try {
     const { name, icon, description } = req.body;
     if (!name) {
@@ -89,6 +100,15 @@ router.post('/:id/edit', async (req, res) => {
     }
 
     await Category.update(req.params.id, { name, icon, description });
+
+    await ActivityLog.log({
+      userId: req.session.user.id,
+      action: 'update',
+      entityType: 'category',
+      entityId: parseInt(req.params.id),
+      entityName: name,
+    });
+
     req.flash('success', 'Category updated.');
     res.redirect('/categories');
   } catch (err) {
@@ -99,9 +119,21 @@ router.post('/:id/edit', async (req, res) => {
 });
 
 // Delete category
-router.post('/:id/delete', async (req, res) => {
+router.post('/:id/delete', requireEditor, async (req, res) => {
   try {
+    const category = await Category.findById(req.params.id);
     await Category.delete(req.params.id);
+
+    if (category) {
+      await ActivityLog.log({
+        userId: req.session.user.id,
+        action: 'delete',
+        entityType: 'category',
+        entityId: parseInt(req.params.id),
+        entityName: category.name,
+      });
+    }
+
     req.flash('success', 'Category deleted.');
     res.redirect('/categories');
   } catch (err) {
@@ -112,7 +144,7 @@ router.post('/:id/delete', async (req, res) => {
 });
 
 // Create type form
-router.get('/:id/types/create', async (req, res) => {
+router.get('/:id/types/create', requireEditor, async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
@@ -135,7 +167,7 @@ router.get('/:id/types/create', async (req, res) => {
 });
 
 // Create type
-router.post('/:id/types/create', async (req, res) => {
+router.post('/:id/types/create', requireEditor, async (req, res) => {
   try {
     const { name, icon, description } = req.body;
     if (!name) {
@@ -143,11 +175,19 @@ router.post('/:id/types/create', async (req, res) => {
       return res.redirect('/categories/' + req.params.id + '/types/create');
     }
 
-    await ItemType.create({
+    const typeId = await ItemType.create({
       categoryId: req.params.id,
       name,
       icon,
       description,
+    });
+
+    await ActivityLog.log({
+      userId: req.session.user.id,
+      action: 'create',
+      entityType: 'type',
+      entityId: typeId,
+      entityName: name,
     });
 
     req.flash('success', 'Type created.');
@@ -160,7 +200,7 @@ router.post('/:id/types/create', async (req, res) => {
 });
 
 // Edit type form
-router.get('/types/:id/edit', async (req, res) => {
+router.get('/types/:id/edit', requireEditor, async (req, res) => {
   try {
     const type = await ItemType.findById(req.params.id);
     if (!type) {
@@ -185,7 +225,7 @@ router.get('/types/:id/edit', async (req, res) => {
 });
 
 // Update type
-router.post('/types/:id/edit', async (req, res) => {
+router.post('/types/:id/edit', requireEditor, async (req, res) => {
   try {
     const { name, icon, description } = req.body;
     if (!name) {
@@ -194,6 +234,15 @@ router.post('/types/:id/edit', async (req, res) => {
     }
 
     await ItemType.update(req.params.id, { name, icon, description });
+
+    await ActivityLog.log({
+      userId: req.session.user.id,
+      action: 'update',
+      entityType: 'type',
+      entityId: parseInt(req.params.id),
+      entityName: name,
+    });
+
     req.flash('success', 'Type updated.');
     res.redirect('/categories');
   } catch (err) {
@@ -204,9 +253,21 @@ router.post('/types/:id/edit', async (req, res) => {
 });
 
 // Delete type
-router.post('/types/:id/delete', async (req, res) => {
+router.post('/types/:id/delete', requireEditor, async (req, res) => {
   try {
+    const type = await ItemType.findById(req.params.id);
     await ItemType.delete(req.params.id);
+
+    if (type) {
+      await ActivityLog.log({
+        userId: req.session.user.id,
+        action: 'delete',
+        entityType: 'type',
+        entityId: parseInt(req.params.id),
+        entityName: type.name,
+      });
+    }
+
     req.flash('success', 'Type deleted.');
     res.redirect('/categories');
   } catch (err) {

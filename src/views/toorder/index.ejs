@@ -1,0 +1,50 @@
+<div class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i class="fa-solid fa-chevron-right separator"></i>
+  <span>To Order</span>
+</div>
+
+<div class="section-header">
+  <h3><%= items.length %> item<%= items.length !== 1 ? 's' : '' %> to order</h3>
+</div>
+
+<% if (items.length === 0) { %>
+  <div class="card">
+    <div class="empty-state fade-up">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <h3>Nothing to order</h3>
+      <p>Items with "To Order" status or below their stock threshold will appear here.</p>
+    </div>
+  </div>
+<% } else { %>
+  <div class="table-wrapper fade-up">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Location</th>
+          <th>Qty</th>
+          <th>Threshold</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach(function(item) { %>
+          <tr>
+            <td>
+              <a href="/items/<%= item.id %>" class="item-name">
+                <i class="<%= item.type_icon %>"></i> <%= item.name %>
+              </a>
+            </td>
+            <td><span class="badge"><%= item.type_name %></span></td>
+            <td><%= item.location_name || '—' %></td>
+            <td><strong><%= item.quantity %></strong></td>
+            <td><%= item.low_stock_threshold || '—' %></td>
+            <td><span class="status-badge status-<%= item.status %>"><%= item.status.replace('_', ' ') %></span></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
