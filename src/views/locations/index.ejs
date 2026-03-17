@@ -1,0 +1,45 @@
+<div class="section-header">
+  <h3><%= allLocations.length %> location<%= allLocations.length !== 1 ? 's' : '' %></h3>
+  <a href="/locations/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Location</a>
+</div>
+
+<% if (tree.length === 0) { %>
+  <div class="card">
+    <div class="empty-state fade-up">
+      <i class="fa-solid fa-location-dot"></i>
+      <h3>No locations yet</h3>
+      <p>Create your first storage location to start organizing.</p>
+      <a href="/locations/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Location</a>
+    </div>
+  </div>
+<% } else { %>
+  <div class="card fade-up">
+    <div class="card-body">
+      <ul class="tree">
+        <% function renderTree(nodes) { %>
+          <% nodes.forEach(function(node) { %>
+            <li class="tree-item">
+              <% if (node.children && node.children.length > 0) { %>
+                <span class="tree-toggle open"><i class="fa-solid fa-chevron-right"></i></span>
+              <% } else { %>
+                <span style="display:inline-block;width:20px;"></span>
+              <% } %>
+              <a href="/locations/<%= node.id %>" class="tree-link">
+                <i class="<%= node.icon %>"></i>
+                <span><%= node.name %></span>
+              </a>
+              <% if (node.children && node.children.length > 0) { %>
+                <div class="tree-children">
+                  <ul class="tree">
+                    <% renderTree(node.children); %>
+                  </ul>
+                </div>
+              <% } %>
+            </li>
+          <% }); %>
+        <% } %>
+        <% renderTree(tree); %>
+      </ul>
+    </div>
+  </div>
+<% } %>

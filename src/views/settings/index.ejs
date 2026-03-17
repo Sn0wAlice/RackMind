@@ -1,0 +1,64 @@
+<div class="settings-grid">
+  <!-- Profile -->
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-circle-user"></i> Profile</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="/settings/profile">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required minlength="3"
+            value="<%= profile.username %>" placeholder="Username">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email"
+            value="<%= profile.email || '' %>" placeholder="user@example.com">
+        </div>
+
+        <div class="detail-row" style="margin-bottom:16px;">
+          <span class="detail-label">Member since</span>
+          <span class="detail-value"><%= new Date(profile.created_at).toLocaleDateString() %></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-check"></i> Save Profile
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Password -->
+  <div class="card fade-up">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-key"></i> Change Password</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="/settings/password">
+        <div class="form-group">
+          <label for="current_password">Current Password</label>
+          <input type="password" id="current_password" name="current_password" required
+            placeholder="Enter current password">
+        </div>
+
+        <div class="form-group">
+          <label for="new_password">New Password</label>
+          <input type="password" id="new_password" name="new_password" required minlength="6"
+            placeholder="Minimum 6 characters">
+        </div>
+
+        <div class="form-group">
+          <label for="new_password_confirm">Confirm New Password</label>
+          <input type="password" id="new_password_confirm" name="new_password_confirm" required minlength="6"
+            placeholder="Confirm new password">
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-key"></i> Change Password
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

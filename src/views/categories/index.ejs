@@ -1,0 +1,55 @@
+<div class="section-header">
+  <h3><%= categories.length %> categor<%= categories.length !== 1 ? 'ies' : 'y' %></h3>
+  <a href="/categories/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Category</a>
+</div>
+
+<% if (categories.length === 0) { %>
+  <div class="card">
+    <div class="empty-state fade-up">
+      <i class="fa-solid fa-tags"></i>
+      <h3>No categories yet</h3>
+      <p>Categories help organize your inventory types.</p>
+      <a href="/categories/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Category</a>
+    </div>
+  </div>
+<% } else { %>
+  <div class="categories-grid">
+    <% categories.forEach(function(cat) { %>
+      <div class="category-card card card-hover fade-up">
+        <div class="category-card-header">
+          <div class="category-card-icon">
+            <i class="<%= cat.icon %>"></i>
+          </div>
+          <h4 class="category-card-name"><%= cat.name %></h4>
+          <span class="badge"><%= cat.type_count %> types</span>
+          <div class="category-card-actions">
+            <a href="/categories/<%= cat.id %>/types/create" class="btn btn-sm" title="Add type"><i class="fa-solid fa-plus"></i></a>
+            <a href="/categories/<%= cat.id %>/edit" class="btn btn-sm" title="Edit"><i class="fa-solid fa-pencil"></i></a>
+            <% if (!cat.is_default) { %>
+              <form method="POST" action="/categories/<%= cat.id %>/delete" class="delete-form">
+                <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa-solid fa-trash"></i></button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (cat.description) { %>
+          <p class="category-card-desc"><%= cat.description %></p>
+        <% } %>
+
+        <div class="category-types-list">
+          <% cat.types.forEach(function(type) { %>
+            <span class="badge" style="cursor:default;" title="<%= type.description || type.name %>">
+              <i class="<%= type.icon %>"></i> <%= type.name %>
+              <% if (!type.is_default) { %>
+                <a href="/categories/types/<%= type.id %>/edit" style="margin-left:4px;color:inherit;opacity:0.6;" title="Edit type">
+                  <i class="fa-solid fa-pencil" style="font-size:9px;"></i>
+                </a>
+              <% } %>
+            </span>
+          <% }); %>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>

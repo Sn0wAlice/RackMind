@@ -1,0 +1,41 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <i class="fa-solid fa-server sidebar-logo-icon"></i>
+    <span class="sidebar-title">RackMind</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">
+      <i class="fa-solid fa-gauge"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="/items" class="nav-link <%= currentPath.startsWith('/items') ? 'active' : '' %>">
+      <i class="fa-solid fa-boxes-stacked"></i>
+      <span>Items</span>
+    </a>
+    <a href="/locations" class="nav-link <%= currentPath.startsWith('/locations') ? 'active' : '' %>">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Locations</span>
+    </a>
+    <a href="/categories" class="nav-link <%= currentPath.startsWith('/categories') ? 'active' : '' %>">
+      <i class="fa-solid fa-tags"></i>
+      <span>Categories</span>
+    </a>
+    <a href="/users" class="nav-link <%= currentPath.startsWith('/users') ? 'active' : '' %>">
+      <i class="fa-solid fa-users"></i>
+      <span>Users</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="/settings" class="sidebar-user-link <%= currentPath.startsWith('/settings') ? 'active' : '' %>">
+      <i class="fa-solid fa-circle-user"></i>
+      <span><%= user ? user.username : '' %></span>
+      <i class="fa-solid fa-gear sidebar-settings-icon"></i>
+    </a>
+    <a href="/auth/logout" class="nav-link logout-link">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>

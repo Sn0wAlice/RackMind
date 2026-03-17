@@ -1,0 +1,63 @@
+<div class="stats-grid">
+  <div class="stat-card card card-hover fade-up">
+    <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+    <div class="stat-value"><%= stats.total || 0 %></div>
+    <div class="stat-label">Total Items</div>
+  </div>
+  <div class="stat-card card card-hover fade-up">
+    <div class="stat-icon"><i class="fa-solid fa-cubes"></i></div>
+    <div class="stat-value"><%= stats.total_quantity || 0 %></div>
+    <div class="stat-label">Total Quantity</div>
+  </div>
+  <div class="stat-card card card-hover fade-up">
+    <div class="stat-icon"><i class="fa-solid fa-location-dot"></i></div>
+    <div class="stat-value"><%= locationCount %></div>
+    <div class="stat-label">Locations</div>
+  </div>
+  <div class="stat-card card card-hover fade-up">
+    <div class="stat-icon"><i class="fa-solid fa-tags"></i></div>
+    <div class="stat-value"><%= categoryCount %></div>
+    <div class="stat-label">Categories</div>
+  </div>
+</div>
+
+<div class="section-header">
+  <h3>Recent Items</h3>
+  <a href="/items" class="btn btn-sm"><i class="fa-solid fa-arrow-right"></i> View All</a>
+</div>
+
+<% if (recentItems.length === 0) { %>
+  <div class="card">
+    <div class="empty-state fade-up">
+      <i class="fa-solid fa-box-open"></i>
+      <h3>No items yet</h3>
+      <p>Start by adding your first inventory item.</p>
+      <a href="/items/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Item</a>
+    </div>
+  </div>
+<% } else { %>
+  <div class="items-grid">
+    <% recentItems.forEach(function(item) { %>
+      <a href="/items/<%= item.id %>" class="item-card card card-hover fade-up" style="text-decoration:none;">
+        <div class="item-card-header">
+          <div class="item-card-icon">
+            <i class="<%= item.type_icon %>"></i>
+          </div>
+          <div class="item-card-info">
+            <h4><%= item.name %></h4>
+            <p><%= item.type_name %></p>
+          </div>
+        </div>
+        <div class="item-card-meta">
+          <span class="badge"><i class="<%= item.type_icon %>"></i> <%= item.category_name %></span>
+          <% if (item.location_name) { %>
+            <span class="badge"><i class="fa-solid fa-location-dot"></i> <%= item.location_name %></span>
+          <% } %>
+          <% if (!item.is_unique && item.quantity > 1) { %>
+            <span class="badge"><i class="fa-solid fa-layer-group"></i> x<%= item.quantity %></span>
+          <% } %>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+<% } %>

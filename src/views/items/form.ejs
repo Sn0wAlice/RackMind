@@ -1,0 +1,124 @@
+<div class="breadcrumb">
+  <a href="/items">Items</a>
+  <i class="fa-solid fa-chevron-right separator"></i>
+  <span><%= editing ? 'Edit' : 'Add' %> Item</span>
+</div>
+
+<div class="card fade-up" style="max-width:720px;">
+  <div class="card-body">
+    <form method="POST" action="/items/<%= editing ? item.id + '/edit' : 'create' %>" enctype="multipart/form-data">
+      <% if (editing && item.image_url) { %>
+        <input type="hidden" name="existing_image" value="<%= item.image_url %>">
+      <% } %>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="categorySelect">Category</label>
+          <select id="categorySelect" name="category_id" required>
+            <option value="">Select a category</option>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat.id %>" <%= (editing && item.category_id == cat.id) ? 'selected' : '' %>>
+                <%= cat.name %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="typeSelect">Type</label>
+          <select id="typeSelect" name="item_type_id" required>
+            <option value="">Select a type</option>
+            <% types.forEach(function(t) { %>
+              <option value="<%= t.id %>" <%= (editing && item.item_type_id == t.id) ? 'selected' : '' %>>
+                <%= t.name %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required placeholder="Item name" value="<%= editing ? item.name : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" placeholder="Optional description"><%= editing && item.description ? item.description : '' %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="location_id">Location</label>
+        <select id="location_id" name="location_id">
+          <option value="">No location</option>
+          <% locations.forEach(function(loc) { %>
+            <option value="<%= loc.id %>" <%= (editing && item.location_id == loc.id) ? 'selected' : '' %>>
+              <%= loc.path || loc.name %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="form-check">
+        <input type="checkbox" id="isUnique" name="is_unique" value="1"
+          <%= (!editing || item.is_unique) ? 'checked' : '' %>>
+        <label for="isUnique">Unique item (has serial number)</label>
+      </div>
+
+      <div id="serialField" class="form-group">
+        <label for="serial_number">Serial Number</label>
+        <input type="text" id="serial_number" name="serial_number" placeholder="S/N"
+          value="<%= editing && item.serial_number ? item.serial_number : '' %>">
+      </div>
+
+      <div id="quantityField" class="form-group" style="display:none;">
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" name="quantity" min="1" value="<%= editing ? item.quantity : 1 %>">
+      </div>
+
+      <!-- Specs -->
+      <div class="form-group">
+        <label>Specifications</label>
+        <div id="specsContainer">
+          <% if (editing && item.specs && typeof item.specs === 'object') { %>
+            <% Object.entries(item.specs).forEach(function([key, value]) { %>
+              <div class="specs-row">
+                <input type="text" name="spec_key[]" placeholder="Key" value="<%= key %>">
+                <input type="text" name="spec_value[]" placeholder="Value" value="<%= value %>">
+                <button type="button" class="btn-remove-spec" title="Remove"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+        <button type="button" id="addSpecBtn" class="btn btn-sm" style="margin-top:8px;">
+          <i class="fa-solid fa-plus"></i> Add Spec
+        </button>
+      </div>
+
+      <!-- Image -->
+      <div class="form-group">
+        <label for="image">Image</label>
+        <% if (editing && item.image_url) { %>
+          <div style="margin-bottom:8px;">
+            <img src="<%= item.image_url %>" alt="Current image" class="item-image-thumb">
+            <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">Current image</span>
+          </div>
+        <% } %>
+        <input type="file" id="image" name="image" accept="image/*">
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" placeholder="Additional notes"><%= editing && item.notes ? item.notes : '' %></textarea>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-<%= editing ? 'check' : 'plus' %>"></i>
+          <%= editing ? 'Save Changes' : 'Create Item' %>
+        </button>
+        <a href="<%= editing ? '/items/' + item.id : '/items' %>" class="btn">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

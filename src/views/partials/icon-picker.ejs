@@ -1,0 +1,16 @@
+<div class="icon-picker-wrapper">
+  <label>Icon</label>
+  <div class="icon-picker-trigger" id="iconPickerTrigger">
+    <i class="<%= typeof currentIcon !== 'undefined' && currentIcon ? currentIcon : 'fa-solid fa-cube' %>" id="iconPreview"></i>
+    <span id="iconLabel"><%= typeof currentIcon !== 'undefined' && currentIcon ? currentIcon : 'fa-solid fa-cube' %></span>
+    <i class="fa-solid fa-chevron-down"></i>
+  </div>
+  <input type="hidden" name="icon" id="iconInput" value="<%= typeof currentIcon !== 'undefined' && currentIcon ? currentIcon : 'fa-solid fa-cube' %>">
+
+  <div class="icon-picker-dropdown" id="iconPickerDropdown">
+    <div class="icon-picker-search">
+      <input type="text" placeholder="Search icons..." id="iconSearchInput">
+    </div>
+    <div class="icon-picker-grid" id="iconPickerGrid"></div>
+  </div>
+</div>

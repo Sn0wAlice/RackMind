@@ -1,0 +1,121 @@
+<div class="breadcrumb">
+  <a href="/items">Items</a>
+  <i class="fa-solid fa-chevron-right separator"></i>
+  <span><%= item.name %></span>
+</div>
+
+<div class="section-header">
+  <div></div>
+  <div class="btn-group">
+    <a href="/items/<%= item.id %>/edit" class="btn"><i class="fa-solid fa-pencil"></i> Edit</a>
+    <form method="POST" action="/items/<%= item.id %>/delete" class="delete-form">
+      <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div>
+    <div class="card fade-up">
+      <div class="card-body">
+        <% if (item.image_url) { %>
+          <img src="<%= item.image_url %>" alt="<%= item.name %>" class="item-image">
+        <% } %>
+
+        <div class="detail-section">
+          <h3>General</h3>
+          <div class="detail-row">
+            <span class="detail-label">Name</span>
+            <span class="detail-value"><%= item.name %></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Category</span>
+            <span class="detail-value"><i class="<%= item.category_icon %>"></i> <%= item.category_name %></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Type</span>
+            <span class="detail-value"><i class="<%= item.type_icon %>"></i> <%= item.type_name %></span>
+          </div>
+          <% if (item.is_unique && item.serial_number) { %>
+            <div class="detail-row">
+              <span class="detail-label">Serial Number</span>
+              <span class="detail-value"><code><%= item.serial_number %></code></span>
+            </div>
+          <% } %>
+          <% if (!item.is_unique) { %>
+            <div class="detail-row">
+              <span class="detail-label">Quantity</span>
+              <span class="detail-value"><%= item.quantity %></span>
+            </div>
+          <% } %>
+        </div>
+
+        <% if (item.description) { %>
+          <div class="detail-section">
+            <h3>Description</h3>
+            <p style="font-size:14px;color:var(--text-secondary);"><%= item.description %></p>
+          </div>
+        <% } %>
+
+        <% if (item.notes) { %>
+          <div class="detail-section">
+            <h3>Notes</h3>
+            <p style="font-size:14px;color:var(--text-secondary);"><%= item.notes %></p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <% if (item.location_id) { %>
+      <div class="card fade-up" style="margin-bottom:16px;">
+        <div class="card-body">
+          <div class="detail-section">
+            <h3>Location</h3>
+            <div class="breadcrumb" style="margin-bottom:8px;">
+              <% locationAncestors.forEach(function(ancestor) { %>
+                <a href="/locations/<%= ancestor.id %>"><i class="<%= ancestor.icon %>"></i> <%= ancestor.name %></a>
+                <i class="fa-solid fa-chevron-right separator"></i>
+              <% }); %>
+              <a href="/locations/<%= item.location_id %>"><i class="fa-solid fa-location-dot"></i> <%= item.location_name %></a>
+            </div>
+            <p style="font-size:13px;color:var(--text-muted);"><%= item.location_path %></p>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (item.specs && typeof item.specs === 'object' && Object.keys(item.specs).length > 0) { %>
+      <div class="card fade-up">
+        <div class="card-body">
+          <div class="detail-section">
+            <h3>Specifications</h3>
+            <% Object.entries(item.specs).forEach(function([key, value]) { %>
+              <div class="detail-row">
+                <span class="detail-label"><%= key %></span>
+                <span class="detail-value"><%= value %></span>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="card fade-up" style="margin-top:16px;">
+      <div class="card-body">
+        <div class="detail-section">
+          <h3>Metadata</h3>
+          <div class="detail-row">
+            <span class="detail-label">Created</span>
+            <span class="detail-value"><%= new Date(item.created_at).toLocaleString() %></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Updated</span>
+            <span class="detail-value"><%= new Date(item.updated_at).toLocaleString() %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

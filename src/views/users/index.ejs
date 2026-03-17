@@ -1,0 +1,43 @@
+<div class="section-header">
+  <h3><%= users.length %> user<%= users.length !== 1 ? 's' : '' %></h3>
+  <a href="/users/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add User</a>
+</div>
+
+<div class="table-wrapper fade-up">
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Created</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(function(u) { %>
+        <tr>
+          <td>
+            <strong><i class="fa-solid fa-circle-user" style="margin-right:6px;color:var(--text-muted);"></i> <%= u.username %></strong>
+          </td>
+          <td><%= u.email || '—' %></td>
+          <td><%= new Date(u.created_at).toLocaleDateString() %></td>
+          <td>
+            <% if (u.must_change_password) { %>
+              <span class="badge" style="background:var(--info-bg);color:var(--info);">Must change password</span>
+            <% } else { %>
+              <span class="badge">Active</span>
+            <% } %>
+          </td>
+          <td>
+            <% if (user && u.id !== user.id) { %>
+              <form method="POST" action="/users/<%= u.id %>/delete" class="delete-form">
+                <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>

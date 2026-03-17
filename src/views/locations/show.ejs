@@ -1,0 +1,95 @@
+<div class="breadcrumb">
+  <a href="/locations">Locations</a>
+  <% ancestors.forEach(function(a) { %>
+    <i class="fa-solid fa-chevron-right separator"></i>
+    <a href="/locations/<%= a.id %>"><%= a.name %></a>
+  <% }); %>
+  <i class="fa-solid fa-chevron-right separator"></i>
+  <span><%= location.name %></span>
+</div>
+
+<div class="section-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="item-card-icon" style="font-size:20px;">
+      <i class="<%= location.icon %>"></i>
+    </div>
+    <div>
+      <h3 style="font-size:18px;"><%= location.name %></h3>
+      <% if (location.description) { %>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:2px;"><%= location.description %></p>
+      <% } %>
+    </div>
+  </div>
+  <div class="btn-group">
+    <a href="/locations/create?parent=<%= location.id %>" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Sub-location</a>
+    <a href="/locations/<%= location.id %>/edit" class="btn btn-sm"><i class="fa-solid fa-pencil"></i> Edit</a>
+    <form method="POST" action="/locations/<%= location.id %>/delete" class="delete-form">
+      <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button>
+    </form>
+  </div>
+</div>
+
+<% if (children.length > 0) { %>
+  <div style="margin-bottom:24px;">
+    <h3 style="font-size:14px;font-weight:600;color:var(--text-secondary);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.04em;">Sub-locations</h3>
+    <div class="items-grid">
+      <% children.forEach(function(child) { %>
+        <a href="/locations/<%= child.id %>" class="item-card card card-hover fade-up" style="text-decoration:none;">
+          <div class="item-card-header">
+            <div class="item-card-icon">
+              <i class="<%= child.icon %>"></i>
+            </div>
+            <div class="item-card-info">
+              <h4><%= child.name %></h4>
+              <% if (child.description) { %>
+                <p><%= child.description %></p>
+              <% } %>
+            </div>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  </div>
+<% } %>
+
+<div>
+  <div class="section-header">
+    <h3 style="font-size:14px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;">
+      Items in this location (<%= items.length %>)
+    </h3>
+    <a href="/items/create" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Item</a>
+  </div>
+
+  <% if (items.length === 0) { %>
+    <div class="card">
+      <div class="empty-state fade-up">
+        <i class="fa-solid fa-box-open"></i>
+        <h3>No items here</h3>
+        <p>This location is empty.</p>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="table-wrapper fade-up">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(function(item) { %>
+            <tr>
+              <td><a href="/items/<%= item.id %>" class="item-name"><i class="<%= item.type_icon %>"></i> <%= item.name %></a></td>
+              <td><span class="badge"><%= item.type_name %></span></td>
+              <td><%= item.category_name %></td>
+              <td><%= item.is_unique ? '1' : item.quantity %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

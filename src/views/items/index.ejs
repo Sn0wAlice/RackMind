@@ -1,0 +1,111 @@
+<div class="section-header">
+  <h3><%= total %> item<%= total !== 1 ? 's' : '' %></h3>
+  <a href="/items/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Item</a>
+</div>
+
+<form method="GET" action="/items" class="filter-bar fade-up">
+  <div class="filter-search">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" name="search" placeholder="Search items..." value="<%= search %>">
+  </div>
+  <select name="category" onchange="this.form.submit()">
+    <option value="">All Categories</option>
+    <% categories.forEach(function(cat) { %>
+      <option value="<%= cat.id %>" <%= filters.category == cat.id ? 'selected' : '' %>><%= cat.name %></option>
+    <% }); %>
+  </select>
+  <% if (types.length > 0) { %>
+    <select name="type" onchange="this.form.submit()">
+      <option value="">All Types</option>
+      <% types.forEach(function(t) { %>
+        <option value="<%= t.id %>" <%= filters.type == t.id ? 'selected' : '' %>><%= t.name %></option>
+      <% }); %>
+    </select>
+  <% } %>
+  <select name="location" onchange="this.form.submit()">
+    <option value="">All Locations</option>
+    <% locations.forEach(function(loc) { %>
+      <option value="<%= loc.id %>" <%= filters.location == loc.id ? 'selected' : '' %>><%= loc.path || loc.name %></option>
+    <% }); %>
+  </select>
+  <div class="view-toggle">
+    <a href="?<%= new URLSearchParams({...query, view: 'card'}).toString() %>" class="<%= viewMode === 'card' ? 'active' : '' %>" title="Card view">
+      <i class="fa-solid fa-grip"></i>
+    </a>
+    <a href="?<%= new URLSearchParams({...query, view: 'table'}).toString() %>" class="<%= viewMode === 'table' ? 'active' : '' %>" title="Table view">
+      <i class="fa-solid fa-list"></i>
+    </a>
+  </div>
+  <noscript><button type="submit" class="btn btn-sm">Filter</button></noscript>
+</form>
+
+<% if (items.length === 0) { %>
+  <div class="card">
+    <div class="empty-state fade-up">
+      <i class="fa-solid fa-box-open"></i>
+      <h3>No items found</h3>
+      <p><%= search ? 'Try a different search or clear filters.' : 'Start by adding your first item.' %></p>
+      <% if (!search) { %>
+        <a href="/items/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Item</a>
+      <% } %>
+    </div>
+  </div>
+<% } else if (viewMode === 'table') { %>
+  <div class="table-wrapper fade-up">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Location</th>
+          <th>Qty</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach(function(item) { %>
+          <tr>
+            <td>
+              <a href="/items/<%= item.id %>" class="item-name">
+                <i class="<%= item.type_icon %>"></i> <%= item.name %>
+              </a>
+            </td>
+            <td><span class="badge"><%= item.type_name %></span></td>
+            <td><%= item.category_name %></td>
+            <td><%= item.location_name || '—' %></td>
+            <td><%= item.is_unique ? '1' : item.quantity %></td>
+            <td><%= new Date(item.updated_at).toLocaleDateString() %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="items-grid">
+    <% items.forEach(function(item) { %>
+      <a href="/items/<%= item.id %>" class="item-card card card-hover fade-up" style="text-decoration:none;">
+        <div class="item-card-header">
+          <div class="item-card-icon">
+            <i class="<%= item.type_icon %>"></i>
+          </div>
+          <div class="item-card-info">
+            <h4><%= item.name %></h4>
+            <p><%= item.type_name %></p>
+          </div>
+        </div>
+        <div class="item-card-meta">
+          <span class="badge"><i class="<%= item.category_icon %>"></i> <%= item.category_name %></span>
+          <% if (item.location_name) { %>
+            <span class="badge"><i class="fa-solid fa-location-dot"></i> <%= item.location_name %></span>
+          <% } %>
+          <% if (!item.is_unique && item.quantity > 1) { %>
+            <span class="badge"><i class="fa-solid fa-layer-group"></i> x<%= item.quantity %></span>
+          <% } %>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('../partials/pagination', { totalPages, currentPage, query }) %>
