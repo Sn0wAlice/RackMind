@@ -1,0 +1,42 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+      MYSQL_DATABASE: ${DB_NAME:-rackmind}
+      MYSQL_USER: ${DB_USER:-rackmind}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-rackmind_secret}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: ghcr.io/sn0walice/rackmind:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-to-a-random-string}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-rackmind}
+      DB_PASSWORD: ${DB_PASSWORD:-rackmind_secret}
+      DB_NAME: ${DB_NAME:-rackmind}
+      DEFAULT_ADMIN_USER: ${DEFAULT_ADMIN_USER:-admin}
+      DEFAULT_ADMIN_PASS: ${DEFAULT_ADMIN_PASS:-admin}
+    volumes:
+      - uploads:/app/public/images/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  uploads:
