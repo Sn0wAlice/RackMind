@@ -8,6 +8,8 @@ Systeme de gestion d'inventaire pour le hardware IT, les composants electronique
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)
 ![Build](https://github.com/sn0walice/RackMind/actions/workflows/docker-build.yml/badge.svg)
 
+![banner.png](.github/banner.png)
+
 ---
 
 ## Fonctionnalites
