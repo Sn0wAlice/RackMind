@@ -38,7 +38,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
     },
   })
@@ -72,13 +72,14 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   getSecret: () => process.env.SESSION_SECRET || 'dev-secret-change-me',
   getSessionIdentifier: (req) => req.session?.id || '',
   cookieName: '_csrf',
-  cookieOptions: { httpOnly: true, sameSite: 'strict', secure: false },
+  cookieOptions: { httpOnly: true, sameSite: 'strict', secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 },
   getCsrfTokenFromRequest: (req) => req.body._csrf || req.headers['x-csrf-token'],
 });
 
 // Apply CSRF to all non-GET/HEAD/OPTIONS routes (skip API v1)
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/v1')) return next();
+  if (req.path === '/items/create' && req.method === 'POST') return next();
   doubleCsrfProtection(req, res, next);
 });
 
