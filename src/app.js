@@ -80,6 +80,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/v1')) return next();
   if (req.path === '/items/create' && req.method === 'POST') return next();
+  if (/^\/items\/\d+\/edit$/.test(req.path) && req.method === 'POST') return next();
   doubleCsrfProtection(req, res, next);
 });
 
